@@ -1,4 +1,4 @@
-%% FDF HEADER READER
+%% FDF IMG READER
 
 % Code which reads in directory of FDF files and outputs entire header
 % structure to fid_header
@@ -20,7 +20,7 @@ clear all
 prompt = {'Enter No. of Gradient Directions (exc b0):', 'Conventional (1) or External Recon (2) data?','Number of Averages?'};
 name = 'Input for Header Reader';
 numlines = 1;
-defaultanswer={'30','1','5'};
+defaultanswer={'30','1','1'};
 
 parameters = inputdlg(prompt,name,numlines,defaultanswer);
 
@@ -340,16 +340,4 @@ img_nii = make_nii(img, [vox_x vox_y vox_z]);          % Haven't bothered puttin
 save_nii(img_nii,[save_dir save_fil]);
 save([save_dir 'bvals'], 'bvals', '-ascii');
 save([save_dir 'bvecs'], 'bvecs', '-ascii');
-
-
-
-% % Plot Check
-% % 
-img2 = img(:,:,20,1);
-img_2 = img2';
-figure;
-imshow(img_2, []); 
-colormap(gray);
-axis image;
-axis off;
 
