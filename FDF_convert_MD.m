@@ -229,6 +229,7 @@ end
 [fid_header.dpe] = strtok(fid_header.dpe,'float  dpe[] = { , };');
 [fid_header.dsl] = strtok(fid_header.dsl,'float  dsl[] = { , };');
 [fid_header.bvalue] = strtok(fid_header.bvalue,'float  bvalue[] = { , };');
+[fid_header.TE] = strtok(fid_header.TE,'float  TE[] = { , };');
 
 if order ==1;
 [fid_header.slices] = strtok(fid_header.slices,'int  slices[] = { , };');
@@ -246,6 +247,7 @@ for n=start:fdf_number
     dpe(n) = str2num(cell2mat(fid_header.dpe(n)));
     dsl(n) = str2num(cell2mat(fid_header.dsl(n)));
     bvals(n) = str2num(cell2mat(fid_header.bvalue(n)));
+    TE(n) = str2num(cell2mat(fid_header.TE(n)));
 end
 
 % Reduce to size of number of fdf files
@@ -254,6 +256,7 @@ dro = dro(start:end);
 dpe = dpe(start:end);
 dsl = dsl(start:end);
 bvals = bvals(start:end);
+TE = TE(start:end);
 
 % Reshape & Check for Vector differences
 if order == 1;
@@ -287,7 +290,7 @@ if order == 1;
     
     bvals = reshape(bvals, [(g+1) slices]);
     bvals = bvals(:,1)
-    
+    TE = TE(:,1)
 else
     x = reshape(dro, [slices (g+1)]);
     y = reshape(dpe, [slices (g+1)]);
@@ -319,6 +322,7 @@ else
     
     bvals = reshape(bvals, [slices (g+1)]);
     bvals = flipud(rot90(bvals(1,:)))
+    TE = TE(:,1)
 end
 
 % Find Dimensionality of Slice
