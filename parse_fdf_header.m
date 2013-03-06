@@ -17,7 +17,7 @@ hdr.dpe=0;
 hdr.dsl=0;
 %loop through headers
 for i = 1:numel(im_hdr)
-    if numel(im_hdr{i}) > 4
+    if numel(im_hdr{i}) >1
         % clean up the header for ease of conversion.
         a = strrep(im_hdr{i},', ',',');
         a = strrep(a,'[]','');
@@ -28,16 +28,19 @@ for i = 1:numel(im_hdr)
         
         a=textscan(a,'%s');
         a = a{1};
-        %type = a{1};
-        field = a{2};
-        field = strrep(field,'*','');
-        
-        
-        value = a{4};
-        
-        value = strrep(value,'"','''');
-        %trim off the ;
-        value = value(1:end-1);
-        eval(['hdr.' field ' = ' value ';']);
+        if numel(a) == 4
+            
+            %type = a{1};
+            field = a{2};
+            field = strrep(field,'*','');
+            
+            
+            value = a{4};
+            
+            value = strrep(value,'"','''');
+            %trim off the ;
+            value = value(1:end-1);
+            eval(['hdr.' field ' = ' value ';']);
+        end
     end
 end
