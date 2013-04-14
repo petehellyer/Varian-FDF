@@ -1,4 +1,4 @@
-function [img, hdr, bvals, bvecs] = process_fdf_folder(dirname,output)
+function [img, hdr, bvals, bvecs] = convert_fdf_folder(dirname,output)
 % PROCESS_FDF_FOLDER converts Varian FDF.img folder to nifti
 %
 % Usage: [img, hdr, bvals, bvecs] = process_fdf_folder(dirname,output)
@@ -29,7 +29,7 @@ for imno = 1:numel(images)
     %load image in
     tmp = images(imno);
     fullname = sprintf('%s%c%s',dirname,'/',tmp.name);
-    [tmp, hdr] = load_fdf(fullname);
+    [tmp, hdr] = load_fdf_img(fullname);
     switch hdr.rank
         case 3
             %we're probably looking at a slab not a slice.

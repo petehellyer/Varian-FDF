@@ -1,4 +1,4 @@
-function hdr = parse_fdf_header(im_hdr)
+function hdr = load_fdf_hdr(im_hdr)
 % PARSE_FDF parses the header as read from an fdf file.
 %
 % Usage: hdr = parse_fdf_header(im_hdr)

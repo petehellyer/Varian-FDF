@@ -1,4 +1,4 @@
-function [img,hdr] = load_fdf(filename)
+function [img,hdr] = load_fdf_img(filename)
 % LOAD_FDF converts a varian fdf file.
 %
 % Usage: [img,hdr] = load_fdf(filename)
@@ -32,7 +32,7 @@ while (~isempty(line) && ~done)
         done = true;
     end
 end
-hdr = parse_fdf_header(hdr);
+hdr = load_fdf_hdr(hdr);
 if hdr.bigendian == 0
     machineformat = 'ieee-le';
 end
