@@ -49,6 +49,10 @@ nii.hdr.hist.srow_y = [hdr.orientation(4:6) 1];
 nii.hdr.hist.srow_z = [hdr.orientation(6:9) 1];
 nii.hdr.dime.pixdim(2) = hdr.roi(1)/10;
 nii.hdr.dime.pixdim(3) = hdr.roi(2)/10;
+nii.hdr.dime.bitpix=hdr.bits;
+if hdr.bits == 32
+nii.hdr.dime.datatype=16;
+end
 switch hdr.rank
     case 2
       nii.hdr.dime.pixdim(4) = hdr.roi(3)*10;  
