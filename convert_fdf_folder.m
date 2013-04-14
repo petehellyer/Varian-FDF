@@ -37,8 +37,8 @@ for imno = 1:numel(images)
         otherwise
             img(1:hdr.matrix(1),1:hdr.matrix(2),hdr.slice_no,hdr.array_index) = tmp;
     end
-    if exist('hdr.bvalue','var') && exist('hdr.dro','var') ...
-            && exist('hdr.dpe','var') && exist('hdr.dsl','var')
+    if isfield(hdr,'bvalue') && isfield(hdr,'dro') ...
+            && isfield(hdr,'dpe') && isfield(hdr,'dsl') 
         bvals(hdr.array_index) = hdr.bvalue;
         bvecs(1,hdr.array_index) = hdr.dro;
         bvecs(2,hdr.array_index) = hdr.dpe;
