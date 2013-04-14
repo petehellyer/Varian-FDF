@@ -11,10 +11,6 @@ function hdr = parse_fdf_header(im_hdr)
 % Author:
 % Peter Hellyer - Imperial College London (peter.hellyer10@imperial.ac.uk)
 
-hdr.bvalue= 0;
-hdr.dro=0;
-hdr.dpe=0;
-hdr.dsl=0;
 %loop through headers
 for i = 1:numel(im_hdr)
     if numel(im_hdr{i}) >1

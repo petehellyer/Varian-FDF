@@ -37,10 +37,13 @@ for imno = 1:numel(images)
         otherwise
             img(1:hdr.matrix(1),1:hdr.matrix(2),hdr.slice_no,hdr.array_index) = tmp;
     end
-    bvals(hdr.array_index) = hdr.bvalue;
-    bvecs(hdr.array_index,1) = hdr.dro;
-    bvecs(hdr.array_index,2) = hdr.dpe;
-    bvecs(hdr.array_index,3) = hdr.dsl;
+    if exist('hdr.bvalue','var') && exist('hdr.dro','var') ...
+            && exist('hdr.dpe','var') && exist('hdr.dsl','var')
+        bvals(hdr.array_index) = hdr.bvalue;
+        bvecs(1,hdr.array_index) = hdr.dro;
+        bvecs(2,hdr.array_index) = hdr.dpe;
+        bvecs(3,hdr.array_index) = hdr.dsl;
+    end
 end
 nii = make_nii(img);
 %set orientation
@@ -51,20 +54,28 @@ nii.hdr.dime.pixdim(2) = hdr.roi(1)/10;
 nii.hdr.dime.pixdim(3) = hdr.roi(2)/10;
 nii.hdr.dime.bitpix=hdr.bits;
 if hdr.bits == 32
-nii.hdr.dime.datatype=16;
+    nii.hdr.dime.datatype=16;
 end
 switch hdr.rank
     case 2
-      nii.hdr.dime.pixdim(4) = hdr.roi(3)*10;  
+        nii.hdr.dime.pixdim(4) = hdr.roi(3)*10;
     otherwise
-nii.hdr.dime.pixdim(4) = hdr.roi(3)/10;
+        nii.hdr.dime.pixdim(4) = hdr.roi(3)/10;
 end
 %set dimension
 if nargin < 2
     %if no output filename is given, make one up from the header.
     output = [hdr.sequence '_' hdr.studyid];
 end
-%nii.hdr.dime.datatype=hdr.bits;
-%nii.hdr.dime.bitpix=hdr.bits;
+%check if there are any bvals and bvecs to save.
+if exist('bvals','var') && exist('bvecs','var')
+    if numel(bvals)>0 && numel(bvecs)>0
+        %format and save to file.
+        %this will be in FSL format
+        %(see: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FDT/UserGuide#DTIFIT)
+        save([output '_bvals'], 'bvals', '-ascii');
+        save([output '_bvecs'], 'bvecs', '-ascii');
+    end
+end
 save_nii(nii,[output '.nii']);
 system(['gzip ' output '.nii']);
