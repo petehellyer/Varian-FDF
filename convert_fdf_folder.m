@@ -1,4 +1,4 @@
-function [img, hdr, bvals, bvecs] = convert_fdf_folder(dirname,output)
+function [img, hdr, bvals, bvecs] = convert_fdf_folder(dirname,output,nosave)
 % PROCESS_FDF_FOLDER converts Varian FDF.img folder to nifti
 %
 % Usage: [img, hdr, bvals, bvecs] = process_fdf_folder(dirname,output)
@@ -17,14 +17,20 @@ function [img, hdr, bvals, bvecs] = convert_fdf_folder(dirname,output)
 %
 % Author:
 % Peter Hellyer - Imperial College London (peter.hellyer10@imperial.ac.uk)
-
 if nargin < 1
     %assume the current directory if no arg given
     dirname = pwd;
 end
+if nargin < 3
+    %automatically force output
+    nosave = false;
+end
 img=[];
 %scroll through images
-images = dir('*.fdf');
+images = dir([dirname '*.fdf']);
+if numel(images)<1
+    error('The selected folder is not a valid fdf folder (or in fact, a valid folder of any kind....)');
+end
 for imno = 1:numel(images)
     %load image in
     tmp = images(imno);
@@ -33,49 +39,56 @@ for imno = 1:numel(images)
     switch hdr.rank
         case 3
             %we're probably looking at a slab not a slice.
-            img(1:hdr.matrix(1),1:hdr.matrix(2),1:hdr.matrix(3)) =tmp;
+            img(1:hdr.matrix(1),1:hdr.matrix(2),1:hdr.matrix(3),1) =tmp;
         otherwise
             img(1:hdr.matrix(1),1:hdr.matrix(2),hdr.slice_no,hdr.array_index) = tmp;
     end
+    %apparently the image needs reordering
+    permute(img,[1,4,3,2]);
     if isfield(hdr,'bvalue') && isfield(hdr,'dro') ...
-            && isfield(hdr,'dpe') && isfield(hdr,'dsl') 
+            && isfield(hdr,'dpe') && isfield(hdr,'dsl')
         bvals(hdr.array_index) = hdr.bvalue;
         bvecs(1,hdr.array_index) = hdr.dro;
         bvecs(2,hdr.array_index) = hdr.dpe;
         bvecs(3,hdr.array_index) = hdr.dsl;
     end
 end
-nii = make_nii(img);
-%set orientation
-nii.hdr.hist.srow_x = [hdr.orientation(1:3) 1];
-nii.hdr.hist.srow_y = [hdr.orientation(4:6) 1];
-nii.hdr.hist.srow_z = [hdr.orientation(6:9) 1];
-nii.hdr.dime.pixdim(2) = hdr.roi(1)/10;
-nii.hdr.dime.pixdim(3) = hdr.roi(2)/10;
-nii.hdr.dime.bitpix=hdr.bits;
-if hdr.bits == 32
-    nii.hdr.dime.datatype=16;
-end
-switch hdr.rank
-    case 2
-        nii.hdr.dime.pixdim(4) = hdr.roi(3)*10;
-    otherwise
-        nii.hdr.dime.pixdim(4) = hdr.roi(3)/10;
-end
-%set dimension
-if nargin < 2
-    %if no output filename is given, make one up from the header.
-    output = [hdr.sequence '_' hdr.studyid];
-end
-%check if there are any bvals and bvecs to save.
-if exist('bvals','var') && exist('bvecs','var')
-    if numel(bvals)>0 && numel(bvecs)>0
-        %format and save to file.
-        %this will be in FSL format
-        %(see: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FDT/UserGuide#DTIFIT)
-        save([output '_bvals'], 'bvals', '-ascii');
-        save([output '_bvecs'], 'bvecs', '-ascii');
+%only do the saving matrix if asked for.
+if nosave == false
+    nii = make_nii(img);
+    %set orientation
+    nii.hdr.hist.srow_x = [hdr.orientation(1:3) 1];
+    nii.hdr.hist.srow_y = [hdr.orientation(4:6) 1];
+    nii.hdr.hist.srow_z = [hdr.orientation(6:9) 1];
+    nii.hdr.dime.pixdim(2) = hdr.roi(1)/10;
+    nii.hdr.dime.pixdim(3) = hdr.roi(2)/10;
+    nii.hdr.dime.bitpix=hdr.bits;
+    if hdr.bits == 32
+        nii.hdr.dime.datatype=16;
     end
+    switch hdr.rank
+        case 2
+            nii.hdr.dime.pixdim(4) = hdr.roi(3)*10;
+        otherwise
+            nii.hdr.dime.pixdim(4) = hdr.roi(3)/10;
+    end
+    %set dimension
+    if nargin < 2
+        %if no output filename is given, make one up from the header.
+        output = [hdr.sequence '_' hdr.studyid];
+    end
+    %check if there are any bvals and bvecs to save.
+    if exist('bvals','var') && exist('bvecs','var')
+        if numel(bvals)>0 && numel(bvecs)>0
+            %format and save to file.
+            %this will be in FSL format
+            %(see: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FDT/UserGuide#DTIFIT)
+            save([output '_bvecs'], 'bvecs', '-ascii');
+            save([output '_bvals'], 'bvals', '-ascii');
+        end
+    end
+    %save out a nifti image.
+    save_nii(nii,[output '.nii']);
+    system(['gzip ' output '.nii']);
 end
-save_nii(nii,[output '.nii']);
-system(['gzip ' output '.nii']);
+end
